@@ -64,7 +64,8 @@ def signup():
     If the there already is a user with that username: flash message
     and re-present form.
     """
-
+    if CURR_USER_KEY in session:
+        del session[CURR_USER_KEY]
     form = UserAddForm()
 
     if form.validate_on_submit():
@@ -210,7 +211,7 @@ def stop_following(follow_id):
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
-def profile():
+def edit_profile():
     """Update profile for current user."""
 
     if not g.user:
