@@ -153,6 +153,7 @@ def users_show(user_id):
                 .order_by(Message.timestamp.desc())
                 .limit(100)
                 .all())
+    likes = [message.id for message in user.likes]
     return render_template('users/show.html', user=user, messages=messages)
 
 
@@ -329,6 +330,10 @@ def messages_destroy(message_id):
         return redirect("/")
 
     msg = Message.query.get(message_id)
+    if msg.user_id != g.user.id:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
     db.session.delete(msg)
     db.session.commit()
 
@@ -351,9 +356,11 @@ def homepage():
         following_ids = [f.id for f in g.user.following] + [g.user.id]
         messages = (Message
                     .query
+                    .filter(Message.user_id.in_(following_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
+
         liked_msg_ids = [msg.id for msg in g.user.likes]
 
         return render_template('home.html', messages=messages)
